@@ -77,9 +77,52 @@ object List {
 
   def flatten[A](a1: List[List[A]]): List[A] =
     foldLeft(a1, Nil: List[A])(append)
+
+  def map[A, B](as: List[A])(f: (A => B)): List[B] =
+    foldRight(as, Nil: List[B])((h, t) => Cons(f(h), t))
+
+  def add1(as: List[Int]): List[Int] =
+    map(as)(_ + 1)
+
+  def add1ViaFoldRight(as: List[Int]): List[Int] =
+    foldRight(as, Nil: List[Int])((h, t) => Cons(h + 1, t))
+
+  def toString(as: List[Double]): List[String] =
+    map(as)(_.toString)
+
+  def filter[A](as: List[A])(f: A => Boolean): List[A] =
+    foldRight(as, Nil: List[A])((h, t) => if (f(h)) Cons(h, t) else t)
+
+  def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] =
+    flatten(map(as)(f))
+
+  def flatMap_1[A, B](as: List[A])(f: A => List[B]): List[B] =
+    foldRight(as, Nil: List[B])((h, t) => List.append(f(h), t))
+
+  def filterViaFlatMap[A](as: List[A])(f: A => Boolean): List[A] =
+    flatMap(as)(a => if (f(a)) List(a) else Nil)
+
+  def addPairwise(a: List[Int], b: List[Int]): List[Int] = (a, b) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, addPairwise(t1, t2))
+  }
+
+  def zipWith[A](a: List[A], b: List[A])(f: (A, A) => A): List[A] = (a, b) match {
+    case (Nil, _) => Nil
+    case (_, Nil) => Nil
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
+  }
+
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = (sup, sub) match {
+    case (Nil, _) => false
+    case (_, Nil) => true
+    case (Cons(h1, t1), Cons(h2, t2)) => {
+      if (h1 == h2) hasSubsequence(t1, t2)
+      else hasSubsequence(t1, Cons(h2, t2))
+    }
+  }
 }
 
-List.flatten(List(List(1,2,3), List(4,5)))
-
-
+List.zipWith(List(1,2,3,4), List(1,2,4))(_ + _)
 
